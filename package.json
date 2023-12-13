@@ -1,0 +1,11 @@
+{
+  "name": "moviesnodejs",
+  "version": "1.0.0",
+  "description": "Nodejs movies professional project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "vinay kumar kharwar",
+  "license": "ISC"
+}
