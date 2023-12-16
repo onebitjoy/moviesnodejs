@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 
-const movie_schema = new mongoose.Schema(
+const MovieSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: [true, "TItle is required field"]
+      required: [true, "Title is required field"]
     },
     genre: {
       type: String
@@ -25,33 +25,19 @@ const movie_schema = new mongoose.Schema(
     },
     directors: [
       {
-        directorId: {
-          type: mongoose.Schema.Types.ObjectId
-        }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Director"
       }
     ],
     actors: [
       {
-        actorId: {
-          type: mongoose.Schema.Types.ObjectId
-        }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Actor"
       }
     ]
   },
   { timestamps: true }
 )
 
-const Movie = mongoose.model("Movie", movie_schema)
-
-// const movie = new Movie({
-//   title: 'Inception',
-//   genre: "Crime, Thriller",
-//   duration: 150,
-//   rating: 8.0,
-//   plot: "A team of conman are on a mission to steal important information inside the mind of a industrialists",
-//   directors: [new mongoose.Types.ObjectId()],
-//   actors: [new mongoose.Types.ObjectId()]
-// })
-
-// await movie.save()
+const Movie = mongoose.model("Movie", MovieSchema)
 export default Movie

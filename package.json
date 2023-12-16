@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Nodejs movies professional project",
   "main": "index.js",
-  "type": "module",
+  "type":"module",
   "scripts": {
     "dev":"nodemon --env-file=config.env index.js"
   },

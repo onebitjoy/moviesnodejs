@@ -1,5 +1,6 @@
 import express from "express"
 import "./db.js"
+const PORT = process.env.PORT
 
 // Models
 import "./models/movie.js"
@@ -7,8 +8,14 @@ import "./models/director.js"
 import "./models/actor.js"
 import "./models/genre.js"
 
-const app = express()
+import movieRouter from "./routes/movieRouter.js"
 
-app.listen(process.env.PORT, () => {
-  console.log("App listening on port ", process.env.PORT)
+const app = express()
+app.use(express.json()) // if there is validation error, check this
+
+// Routers
+app.use("/api/movies", movieRouter)
+
+app.listen(PORT, () => {
+  console.log("App listening on port ", PORT)
 })

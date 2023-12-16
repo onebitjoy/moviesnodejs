@@ -2,11 +2,6 @@ import mongoose from "mongoose";
 
 const actor_schema = new mongoose.Schema(
   {
-    // directorId: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   default: new mongoose.Types.ObjectId(),
-    //   alias: "_id"
-    // },
     fullName: {
       type: String,
       required: true,
@@ -21,10 +16,8 @@ const actor_schema = new mongoose.Schema(
     },
     movies: [
       {
-        movieId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Movie"
-        }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Movie"
       }
     ]
   },
