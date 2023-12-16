@@ -7,7 +7,8 @@ const MovieSchema = new mongoose.Schema(
       required: [true, "Title is required field"]
     },
     genre: {
-      type: String
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Genre"
     },
     duration: {
       type: Number,
@@ -22,6 +23,12 @@ const MovieSchema = new mongoose.Schema(
     plot: {
       type: String,
       max: 500
+    },
+    releaseYear: {
+      type: Number,
+      min: 1900,
+      max: new Date().getFullYear(),
+      required: true
     },
     directors: [
       {

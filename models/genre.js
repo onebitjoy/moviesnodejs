@@ -1,15 +1,14 @@
 import mongoose from "mongoose";
 
-const genre_schema = new mongoose.Schema({
+const GenreSchema = new mongoose.Schema({
   genreName: {
     type: String
   },
   movies: [{
-    moviesId: {
-      type: mongoose.Schema.Types.ObjectId
-    }
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Movie"
   }]
 })
 
-const Genre = mongoose.model("Genre", genre_schema)
+const Genre = mongoose.model("Genre", GenreSchema)
 export default Genre
