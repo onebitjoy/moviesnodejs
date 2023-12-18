@@ -1,15 +1,15 @@
 import express from "express";
-import { directorController } from "../controller/directorController.js";
 
+import { directorController } from "../controller/directorController.js";
 const directorRouter = express.Router()
 
 directorRouter.route("/")
-  .get(directorController.getAllMovies)
-  .post(directorController.createMovie)
+  .get(directorController.getAllDirectors)
+  .post(directorController.createDirector)
 
-directorRouter.route("/:movieId")
-  .get(directorController.getMovie)
-  .post(directorController.updateMovie)
-  .delete(directorController.deleteMovie)
+directorRouter.route("/:directorId")
+  .get(directorController.getDirector)
+  .post(directorController.updateDirector)
+  .delete(directorController.deleteDirector)
 
 export default directorRouter

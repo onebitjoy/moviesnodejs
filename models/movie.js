@@ -4,25 +4,39 @@ const MovieSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: [true, "Title is required field"]
+      required: [true, "Title is required field"],
+      trim: true
     },
-    genre: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Genre"
-    },
+    genre: [
+      {
+        type: String,
+      }
+    ],
     duration: {
       type: Number,
       required: [true, "Duration is required field"]
     },
     rating: {
       type: Number,
-      default: 1.0,
-      min: 0.0,
-      max: 10.0
+      min: 0,
+      max: 10
     },
+    totalRatingCount: {
+      type: Number
+    },
+    coverImage: {
+      type: String,
+      required: [true, "coverImage is required"]
+    },
+    language: [
+      {
+        type: String,
+      }
+    ],
     plot: {
       type: String,
-      max: 500
+      max: 500,
+      trim: true
     },
     releaseYear: {
       type: Number,

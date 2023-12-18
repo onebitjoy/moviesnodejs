@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "Nodejs movies professional project",
   "main": "index.js",
-  "type":"module",
+  "type": "module",
   "scripts": {
-    "dev":"nodemon --env-file=config.env index.js"
+    "dev": "nodemon --env-file=config.env index.js",
+    "sampler":"node --env-file=config.env ./test/creator.js"
   },
   "author": "vinay kumar kharwar",
   "license": "ISC",
@@ -14,6 +15,7 @@
     "mongoose": "^8.0.3"
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.3.1",
     "nodemon": "^3.0.2"
   }
 }
