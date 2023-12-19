@@ -4,10 +4,10 @@ import "../db.js"
 async function creator() {
 
   try {
-    console.log("Saving genres inside database...");
-    await genreSaver(genreData)
-    console.log("Saving sample movie inside database...");
-    await randomMovieSaver(50)
+    // console.log("Saving genres inside database...");
+    // await genreSaver(genreData)
+    // console.log("Saving sample movie inside database...");
+    // await randomMovieSaver(50)
     // randomGenres()
 
   } catch (error) {
