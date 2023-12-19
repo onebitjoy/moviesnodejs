@@ -22,7 +22,9 @@ const MovieSchema = new mongoose.Schema(
       max: 10
     },
     totalRatingCount: {
-      type: Number
+      type: Number,
+      // This below field is used to handle whether a user will get a particular field upon query or not
+      // select: false -- will not send the field, 'true' will send
     },
     coverImage: {
       type: String,
