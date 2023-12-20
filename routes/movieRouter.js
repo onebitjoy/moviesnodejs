@@ -3,6 +3,9 @@ import { movieController } from "../controller/movieController.js";
 
 const movieRouter = express.Router()
 
+movieRouter.route('/highest-rated')
+  .get(movieController.getHighestRated, movieController.getAllMovies)
+
 movieRouter.route("/")
   .get(movieController.getAllMovies)
   .post(movieController.createMovie)

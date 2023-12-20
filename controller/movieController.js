@@ -1,14 +1,24 @@
-import { errorMsg } from "../messages/errorMsg.js"
-import { successMsg } from "../messages/successMsg.js"
 import Movie from "../models/movie.js"
 
+import { getHighestRated } from './middlewares/getHighestRated.js'
+
+import { errorMsg } from "../messages/errorMsg.js"
+import { successMsg } from "../messages/successMsg.js"
+
 export const movieController = {
+  //middlewares
+  getHighestRated,
+
   // require a movieId
   getMovie: async (req, res) => {
     try {
-      const movie = await Movie.findById(req.params.movieId)
-      res.status(200).json(successMsg(movie))
+      const movie = Movie
+        .findById(req.params.movieId)
+        .select("-createdAt -updatedAt -__v")
+
+      res.status(200).json(successMsg(await movie))
     } catch (error) {
+      console.log(error);
       res.status(500).json(errorMsg(error))
     }
   },
