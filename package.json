@@ -6,12 +6,13 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon --env-file=config.env index.js",
-    "sampler":"node --env-file=config.env ./test/creator.js"
+    "sampler": "node --env-file=config.env ./test/creator.js"
   },
   "author": "vinay kumar kharwar",
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.2",
+    "helmet": "^7.1.0",
     "mongoose": "^8.0.3"
   },
   "devDependencies": {

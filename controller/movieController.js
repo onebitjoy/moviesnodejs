@@ -1,6 +1,7 @@
 import Movie from "../models/movie.js"
 
 import { getHighestRated } from './middlewares/getHighestRated.js'
+import { ApiFeatures } from "../utils/apiFeatures.js"
 
 import { errorMsg } from "../messages/errorMsg.js"
 import { successMsg } from "../messages/successMsg.js"
@@ -50,75 +51,17 @@ export const movieController = {
 
   // doesnt require a movieId, but may recieve query parameters
   getAllMovies: async (req, res) => {
-
-    // Filtering
-    const { rating, duration, totalRatingCount, genre, language, releaseYear } = req.query
-
-    const filter = {}
-
-    if (rating) filter.rating = { $gte: parseFloat(rating) }
-    if (duration) filter.duration = { $lte: parseInt(duration) }
-    if (totalRatingCount) filter.totalRatingCount = { $gte: parseInt(totalRatingCount) }
-    if (genre) {
-      // If multiple genres are given, it will split them into an array,
-      // mongoose then finds all the movies that contains one or more specified genres
-      let genres = []
-      genres = genre.split(',')
-      filter.genre = { $in: genres }
-    }
-    if (language) {
-      let languages = []
-      languages = language.split(',')
-      filter.language = { $in: languages }
-    }
-    if (releaseYear) filter.releaseYear = { $eq: parseInt(releaseYear) }
-    // -----------------------------------------------------
+    // try {
+    let query = Movie.find()
+    let apiFeatures = new ApiFeatures(query, req.query)
+    apiFeatures.filter().sort().paginate()
 
     try {
-      let query = Movie.find(filter)
-
-      //sorting
-      if (req.query.sort) {
-        let sortField =
-          ['title', 'rating', 'totalRatingCount', 'releaseDate', '-title', '-rating', '-totalRatingCount', '-releaseDate']
-            .includes(req.query.sort) ?
-            req.query.sort :
-            '-totalRatingCount'
-        // default - ascending, to get descending, just forward - with field name
-        query = query.sort(sortField)
-      }
-      // -----------------------------------------------------
-
-      // limiting fields
-      if (req.query.fields) {
-        const fields = req.query.fields.split(",").join(" ")
-        query = query.select(fields)
-      } else {
-        query = query.select("-createdAt -updatedAt -__v")
-      }
-      // -----------------------------------------------------
-
-      // pagination
-      const page = req.query.page || 1
-      // if the limit is undefined, then limit = 10
-      // if 0 < limit <= 50 , limit is req.query.limit, else limit is 50
-      const limit =
-        (!req.query.limit) ? 20 :
-          (req.query.limit > 0 && req.query.limit <= 50) ?
-            +req.query.limit : 50
-      const skip = (page - 1) * limit
-      // -----------------------------------------------------
-
-      const movies = await query.skip(skip).limit(limit)
-      if (movies.length) {
-        res.status(200).json(successMsg(movies))
-      } else {
-        res.status(404).json(errorMsg("No more movies"))
-      }
+      const result = await apiFeatures.query
+      res.status(200).json(successMsg(result))
     } catch (error) {
       res.status(500).json(errorMsg(error))
     }
-
   },
 
   createMovie: async (req, res) => {
@@ -129,4 +72,67 @@ export const movieController = {
       res.status(500).json(errorMsg(err))
     }
   },
+
+  getMovieStats: async (req, res) => {
+    // aggregate function takes an array of stages,
+    // the data goes from one stage to another while being manipulated by the current stage
+    try {
+      const stats = await Movie.aggregate([
+        { $match: { rating: { $gte: 7 } } },
+        {
+          $group: {
+            // The _id is the key according to which the documents will be grouped
+            _id: '$releaseYear',
+            averageRating: { $avg: '$rating' },
+            highestRated: { $max: '$rating' },
+            lowestRated: { $min: '$rating' },
+            movieCount: { $sum: 1 }
+            // The sum property adds one for each movie,
+            // so it gets the total count
+          }
+        },
+        // the property below needs to be a property that we get from grouping
+        { $sort: { averageRating: 1 } }
+        // We can also repeat any steps - match, group and sort
+      ])
+
+      res.status(200).json(successMsg(stats))
+    } catch (error) {
+      res.status(500).json(errorMsg(error))
+    }
+  },
+
+  getMovieByGenre: async (req, res) => {
+    try {
+      const genre = req.params.genre
+      // sometimes, we are using $ with fieldnames, that is when we refer to fields in mongoDB
+      // the fields without $ are fetched
+      const movies = await Movie.aggregate([
+        { $unwind: '$genre' },
+        { $match: { genre: { $eq: genre } } },
+        {
+          $group: {
+            _id: '$genre',
+            movieCount: { $sum: 1 },
+            movies: { $push: '$title' }
+          }
+        },
+        { $addFields: { genre: '$_id' } }, // the IDs of the fetched docs
+        { $project: { _id: 0 } }, // project is used to include(1) or exclude(0)
+        { $sort: { movieCount: -1 } }, // movieCount is local to this operation
+        // { $limit: 6 }
+      ])
+      /*
+      The unwind creates multiple documents for the same movie
+      If the movie Interstellar has two genre - [ Action, Thriller ]
+      The unwind will create two copies of movie Interstellar each
+      with one genre -
+      Interstellar : {genre: Action} and Interstellar : {genre: Thriller}
+      */
+
+      res.status(200).json((successMsg(movies)))
+    } catch (error) {
+      res.status.json(errorMsg(error))
+    }
+  }
 }

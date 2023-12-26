@@ -1,8 +1,8 @@
 import express from "express"
+import helmet from "helmet"
 
 import "./db.js"
-
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 3000
 
 // Models
 import "./models/movie.js"
@@ -11,7 +11,9 @@ import "./models/actor.js"
 import "./models/genre.js"
 
 const app = express()
+
 app.use(express.json()) // if there is validation error, check this
+app.use(helmet()) // prevents Cross-Site Scripting
 
 // Routers
 import movieRouter from "./routes/movieRouter.js"

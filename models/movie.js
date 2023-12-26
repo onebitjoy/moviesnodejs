@@ -59,8 +59,35 @@ const MovieSchema = new mongoose.Schema(
       }
     ]
   },
-  { timestamps: true }
+  /*
+  If you include toJSON: { virtuals: true } but not toObject: { virtuals: true },
+  it means that virtual properties will be included when converting the document to JSON,
+  but not when converting it to a plain JavaScript object.
+  */
+  // OPTIONS ->
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+    id: false
+  }
 )
+
+MovieSchema.virtual("durationInHours").get(function () {
+  // anon function because arrow function doesn't support 'this'
+  return (this.duration / 60).toFixed(2)
+})
+
+MovieSchema.methods.toJSON = function () {
+  const movie = this
+  const movieObj = movie.toObject()
+
+  delete movieObj.__v
+  delete movieObj.updatedAt
+  delete movieObj.createdAt
+
+  return movieObj
+}
 
 const Movie = mongoose.model("Movie", MovieSchema)
 export default Movie
