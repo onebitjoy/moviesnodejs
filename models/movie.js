@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import fs from 'fs'
 
 const MovieSchema = new mongoose.Schema(
   {
@@ -46,6 +47,9 @@ const MovieSchema = new mongoose.Schema(
       max: new Date().getFullYear(),
       required: true
     },
+    createdBy: {
+      type: String
+    },
     directors: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -72,10 +76,30 @@ const MovieSchema = new mongoose.Schema(
     id: false
   }
 )
-
+/* VIRTUAL */
 MovieSchema.virtual("durationInHours").get(function () {
   // anon function because arrow function doesn't support 'this'
   return (this.duration / 60).toFixed(2)
+})
+
+/*
+  We can have multiple pre and post hooks,
+  the order of application is same as their definition
+*/
+/* PRE HOOKS */
+MovieSchema.pre('save', function (next) {
+  // console.table(this)
+  this.createdBy = "Abhishek Kharwar"
+  next()
+})
+
+/* POST HOOKS */
+MovieSchema.post('save', function (doc, next) {
+  const content = `Movie(${doc.title}) is created\n`
+  fs.writeFileSync("./Logs/logs.txt", content, { flag: 'a' }, (err) => {
+    console.log(err)
+  })
+  next()
 })
 
 MovieSchema.methods.toJSON = function () {

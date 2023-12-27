@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "prod": "pm2 start index.js -i 4" ,
+    "prod": "pm2 start index.js -i 4",
     "dev": "nodemon --env-file=config.env index.js",
     "sampler": "node --env-file=config.env ./test/creator.js"
   },
@@ -17,6 +17,7 @@
     "express": "^4.18.2",
     "helmet": "^7.1.0",
     "mongoose": "^8.0.3",
+    "nodemon": "^3.0.2",
     "pm2": "^5.3.0"
   },
   "devDependencies": {
