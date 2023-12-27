@@ -6,8 +6,6 @@ export class ApiFeatures {
     // in short we are going to chain all the different methods.
     this.query = query // Movie.find | Director.find etc.
     this.queryStr = queryStr // req.query
-
-    console.log("Constructor is working....");
   }
 
   filter() {
@@ -45,8 +43,6 @@ export class ApiFeatures {
     const limit = (this.queryStr.limit > 50 && req.query.limit < 0) ? this.queryStr.limit : 20
 
     const skip = (page - 1) * limit
-
-    console.log(page, limit, skip);
 
     this.query = this.query.skip(skip).limit(limit)
 

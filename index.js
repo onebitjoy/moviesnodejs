@@ -1,5 +1,9 @@
 import express from "express"
 import helmet from "helmet"
+import compression from "compression"
+
+import dotenv from 'dotenv'
+dotenv.config({ path: "./config.env" })
 
 import "./db.js"
 const PORT = process.env.PORT || 3000
@@ -14,6 +18,9 @@ const app = express()
 
 app.use(express.json()) // if there is validation error, check this
 app.use(helmet()) // prevents Cross-Site Scripting
+app.use(compression())
+
+console.log(process.env.PORT);
 
 // Routers
 import movieRouter from "./routes/movieRouter.js"

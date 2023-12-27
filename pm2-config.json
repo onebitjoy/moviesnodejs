@@ -1,0 +1,9 @@
+{
+  "apps": [{
+  "name": "movie",
+  "script": "./index.js",
+  "instances": 4,
+  "watch": true,
+  "ignore_watch": ["node_modules", "test", ".git", "README.md"]
+  }]
+}
