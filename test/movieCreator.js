@@ -124,6 +124,8 @@ const popularLanguages = [
 const generateRandomMovie = () => ({
   title: faker.word.adjective() + " " + faker.word.noun(),
   genre: randomGenres(genreData),
+  releaseDate: randomDates(),
+  price: randomNumberGenerator(2, 100),
   duration: randomNumberGenerator(2, 240),
   rating: randomNumberGenerator(0, 10),
   language: randomLanguages(popularLanguages),
@@ -134,6 +136,16 @@ const generateRandomMovie = () => ({
   directors: [],
   actors: [],
 });
+
+console.log(generateRandomMovie())
+function randomDates() {
+  const start = new Date('1900-01-01')
+  const end = new Date()
+
+  const randomTime = start.getTime() + Math.random() * (end.getTime() - start.getTime())
+
+  return (new Date(randomTime)).toISOString()
+}
 
 function randomNumberGenerator(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min

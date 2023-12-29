@@ -50,6 +50,15 @@ const MovieSchema = new mongoose.Schema(
     createdBy: {
       type: String
     },
+    price: {
+      type: Number,
+      validate: {
+        validator: function (value) {
+          return value >= 0
+        },
+        message: "You can't have negative price"
+      }
+    },
     directors: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -102,6 +111,11 @@ MovieSchema.post('save', function (doc, next) {
   next()
 })
 
+MovieSchema.pre('find', function (next) {
+  // this -- is the query object
+
+  next()
+})
 MovieSchema.methods.toJSON = function () {
   const movie = this
   const movieObj = movie.toObject()
