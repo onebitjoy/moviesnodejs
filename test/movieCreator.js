@@ -137,7 +137,6 @@ const generateRandomMovie = () => ({
   actors: [],
 });
 
-console.log(generateRandomMovie())
 function randomDates() {
   const start = new Date('1900-01-01')
   const end = new Date()

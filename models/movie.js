@@ -13,6 +13,9 @@ const MovieSchema = new mongoose.Schema(
         type: String,
       }
     ],
+    releaseDate: {
+      type: Date
+    },
     duration: {
       type: Number,
       required: [true, "Duration is required field"]
@@ -102,6 +105,13 @@ MovieSchema.pre('save', function (next) {
   next()
 })
 
+MovieSchema.pre('find', function (next) {
+  // this -- is the query object
+  // send only the movies that are already launched, not will be launched in the future
+  this.find({ releaseDate: { $lte: Date.now() } })
+  next()
+})
+
 /* POST HOOKS */
 MovieSchema.post('save', function (doc, next) {
   const content = `Movie(${doc.title}) is created\n`
@@ -111,11 +121,7 @@ MovieSchema.post('save', function (doc, next) {
   next()
 })
 
-MovieSchema.pre('find', function (next) {
-  // this -- is the query object
 
-  next()
-})
 MovieSchema.methods.toJSON = function () {
   const movie = this
   const movieObj = movie.toObject()

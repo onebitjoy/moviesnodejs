@@ -6,18 +6,19 @@ async function creator() {
   try {
     // console.log("Saving genres inside database...");
     // await genreSaver(genreData)
-    // console.log("Saving sample movie inside database...");
-    // await randomMovieSaver(50)
+    console.log("Saving sample movie inside database...");
+    await randomMovieSaver(200)
     // randomGenres()
 
   } catch (error) {
+    console.log("errors");
     console.log(error);
 
-  } finally {
-    process.exit()
+    // } finally {
+    // process.exit()
   }
 
 }
 
 // just uncomment the line below to update the database with sample data
-await creator()
+creator()
