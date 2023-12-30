@@ -13,13 +13,11 @@ export const movieController = {
   // require a movieId
   getMovie: async (req, res) => {
     try {
-      const movie = Movie
+      const movie = await Movie
         .findById(req.params.movieId)
         .select("-createdAt -updatedAt -__v")
-
-      res.status(200).json(successMsg(await movie))
+      res.status(200).json(successMsg(movie))
     } catch (error) {
-      console.log(error);
       res.status(500).json(errorMsg(error))
     }
   },
@@ -78,6 +76,7 @@ export const movieController = {
     // the data goes from one stage to another while being manipulated by the current stage
     try {
       const stats = await Movie.aggregate([
+        // { $match: { releaseDate: { $lte: new Date() } } }, -- works, but done in aggregation pipeline
         { $match: { rating: { $gte: 7 } } },
         {
           $group: {

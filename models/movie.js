@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import fs from 'fs'
+import { nanoid } from "nanoid";
 
 const MovieSchema = new mongoose.Schema(
   {
@@ -47,7 +48,7 @@ const MovieSchema = new mongoose.Schema(
     releaseYear: {
       type: Number,
       min: 1900,
-      max: new Date().getFullYear(),
+      // max: new Date().getFullYear(),
       required: true
     },
     createdBy: {
@@ -105,21 +106,43 @@ MovieSchema.pre('save', function (next) {
   next()
 })
 
-MovieSchema.pre('find', function (next) {
-  // this -- is the query object
+MovieSchema.pre(/^find/, function (next) {
+  //This function is running before any find... method is executed on mongoDB
+  // this -- is the query object, that means here we are just appending queries to it
   // send only the movies that are already launched, not will be launched in the future
-  this.find({ releaseDate: { $lte: Date.now() } })
+  // this.find({ releaseDate: { $lte: Date.now() } }) 
+  // this.queryDetails = {
+  this.queryId = nanoid(),
+    this.startTime = Date.now()
+  // }
+  next()
+})
+
+MovieSchema.pre('aggregate', function (next) {
+  // console.log(this.pipeline()) -- returns entire aggregation array
+  // this.pipeline().unshift({ $match: { releaseDate: { $lte: new Date() } } })
+  this.pipeline().unshift({ $sort: { _id: 1 } })
   next()
 })
 
 /* POST HOOKS */
+MovieSchema.post(/^find/, function (docs, next) {
+  // this.find({ releaseDate: { $lte: Date.now() } })
+  this.endTime = Date.now()
+  const content = `Query ${this.queryId} ${this.startTime}ms ${this.endTime}ms\n`
+  fs.writeFile('./Logs/logs.txt', content, { flag: 'a' }, err => { console.log(err) })
+  next()
+})
+
 MovieSchema.post('save', function (doc, next) {
-  const content = `Movie(${doc.title}) is created\n`
-  fs.writeFileSync("./Logs/logs.txt", content, { flag: 'a' }, (err) => {
+  const content = `Movie(${doc.title}) is created\n by ${doc?.createdBy}`
+
+  fs.writeFile("./Logs/logs.txt", content, { flag: 'a' }, (err) => {
     console.log(err)
   })
   next()
 })
+
 
 
 MovieSchema.methods.toJSON = function () {
