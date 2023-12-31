@@ -40,7 +40,7 @@ export const movieController = {
       if (Object.keys(req.body).length === 0) {
         return res.status(203).json(errorMsg("No Content to Update!"))
       }
-      const movie = await Movie.findOneAndUpdate({ _id: req.params.movieId }, req.body, { new: true })
+      const movie = await Movie.findOneAndUpdate({ _id: req.params.movieId }, req.body, { new: true, runValidators: true })
       res.status(200).send(movie)
     } catch (error) {
       res.status(500).json(errorMsg("Something went wrong"))

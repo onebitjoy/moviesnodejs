@@ -12,6 +12,39 @@ const MovieSchema = new mongoose.Schema(
     genre: [
       {
         type: String,
+        // enum: [
+        //   'Literary genres',
+        //   'Action',
+        //   'Adventure',
+        //   'Comedy',
+        //   'Crime and mystery',
+        //   'Death game',
+        //   'Fantasy',
+        //   'Historical',
+        //   'Historical fiction',
+        //   'Horror',
+        //   'Romance',
+        //   'Satire',
+        //   'Science fiction',
+        //   'Cyberpunk and derivatives',
+        //   'Speculative',
+        //   'Thriller',
+        //   'Isekai',
+        //   'Other',
+        //   'Film and television genres',
+        //   'Scripted',
+        //   'Action and adventure',
+        //   'Animation',
+        //   'Comedy',
+        //   'Devotional',
+        //   'Drama',
+        //   'Hindu mythology',
+        //   'Historical',
+        //   'Horror',
+        //   'Science fiction',
+        //   'Western',
+        //   'Unscripted'
+        // ]
       }
     ],
     releaseDate: {
@@ -23,8 +56,14 @@ const MovieSchema = new mongoose.Schema(
     },
     rating: {
       type: Number,
-      min: 0,
-      max: 10
+      // min: 0,  
+      // max: 10
+      validate: {
+        validator: function (value) {
+          return value >= 0 && value <= 10
+        },
+        message: "Given rating of {VALUE} is not valid"
+      }
     },
     totalRatingCount: {
       type: Number,
@@ -126,19 +165,19 @@ MovieSchema.pre('aggregate', function (next) {
 })
 
 /* POST HOOKS */
-MovieSchema.post(/^find/, function (docs, next) {
-  // this.find({ releaseDate: { $lte: Date.now() } })
+MovieSchema.post(/^find/, async function (docs, next) {
   this.endTime = Date.now()
   const content = `Query ${this.queryId} ${this.startTime}ms ${this.endTime}ms\n`
-  fs.writeFile('./Logs/logs.txt', content, { flag: 'a' }, err => { console.log(err) })
+  // console.log(content);
+  fs.writeFileSync('./Logs/logs.txt', content, { flag: 'a' }, err => { console.log("Logging Error - Post hook", err) })
   next()
 })
 
-MovieSchema.post('save', function (doc, next) {
+MovieSchema.post('save', async function (doc, next) {
   const content = `Movie(${doc.title}) is created\n by ${doc?.createdBy}`
 
   fs.writeFile("./Logs/logs.txt", content, { flag: 'a' }, (err) => {
-    console.log(err)
+    console.log("logging error during save", err)
   })
   next()
 })

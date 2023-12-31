@@ -159,6 +159,9 @@ export const genreData = [
 
 ];
 
+let genres = []
+genreData.forEach((genre) => genres.push(genre.name))
+console.log(genres)
 
 export async function genreSaver(data) {
   data.forEach(async (genre) => {

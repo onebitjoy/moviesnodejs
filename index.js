@@ -1,6 +1,7 @@
 import express from "express"
 import helmet from "helmet"
 import compression from "compression"
+import { errorMsg } from "./messages/errorMsg.js"
 
 // import dotenv from 'dotenv'
 // dotenv.config({ path: "./config.env" })
@@ -25,9 +26,13 @@ import movieRouter from "./routes/movieRouter.js"
 import directorRouter from "./routes/directorRouter.js"
 import actorRouter from "./routes/actorRouter.js"
 
-app.use("/api/movies", movieRouter)
-app.use("/api/directors", directorRouter)
-app.use("/api/actors", actorRouter)
+app.use("/api/v1/movies", movieRouter)
+app.use("/api/v1/directors", directorRouter)
+app.use("/api/v1/actors", actorRouter)
+
+app.all('*', (req, res) => {
+  res.status(404).json(errorMsg(`Can't find the route - ${req.originalUrl}`))
+})
 
 app.listen(PORT, () => {
   console.log("App listening on port -", PORT)
