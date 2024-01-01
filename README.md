@@ -3,6 +3,7 @@ Technologies:
 - Express.js
 - Mongoose
 - MongoDB
+- 
 
 Models:
 - Movie
@@ -15,4 +16,5 @@ Functionality:
 - Sorting
 - Pagination
 - Limited Fields
-
+- Invalid Route Handling
+- Error Handling for the entire application (currently working)

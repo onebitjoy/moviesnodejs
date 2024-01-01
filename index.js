@@ -2,6 +2,8 @@ import express from "express"
 import helmet from "helmet"
 import compression from "compression"
 import { errorMsg } from "./messages/errorMsg.js"
+import { CustomError } from "./utils/CustomError.js"
+import globalErrorHandler from "./controller/errorController.js"
 
 // import dotenv from 'dotenv'
 // dotenv.config({ path: "./config.env" })
@@ -30,9 +32,13 @@ app.use("/api/v1/movies", movieRouter)
 app.use("/api/v1/directors", directorRouter)
 app.use("/api/v1/actors", actorRouter)
 
-app.all('*', (req, res) => {
-  res.status(404).json(errorMsg(`Can't find the route - ${req.originalUrl}`))
+app.all('*', (req, res, next) => {
+  const err = new CustomError(`Can't find page - ${req.originalUrl} on the server`, 404)
+  next(err)
 })
+
+// don't add () at the end, produces undefined error
+app.use(globalErrorHandler)
 
 app.listen(PORT, () => {
   console.log("App listening on port -", PORT)
