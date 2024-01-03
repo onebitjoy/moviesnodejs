@@ -168,16 +168,31 @@ MovieSchema.pre('aggregate', function (next) {
 MovieSchema.post(/^find/, async function (docs, next) {
   this.endTime = Date.now()
   const content = `Query ${this.queryId} ${this.startTime}ms ${this.endTime}ms\n`
-  // console.log(content);
   fs.writeFileSync('./Logs/logs.txt', content, { flag: 'a' }, err => { console.log("Logging Error - Post hook", err) })
   next()
 })
 
 MovieSchema.post('save', async function (doc, next) {
-  const content = `Movie(${doc.title}) is created\n by ${doc?.createdBy}`
+  const content = `Movie(${doc.title}) is created by ${doc?.createdBy}\n`
 
-  fs.writeFile("./Logs/logs.txt", content, { flag: 'a' }, (err) => {
-    console.log("logging error during save", err)
+  fs.appendFile("./Logs/logs.txt", content, (err) => {
+
+    if (err === null) { return }
+
+    if (err?.code === "EACCES") {
+      console.log("Denied permission to write, check movie.js");
+      return
+    }
+
+    if (err?.code === "ENOTDIR" || err?.code === "ENOENT") {
+      console.log("Movie.js:", "No file to write");
+      return
+    }
+
+    if (err !== null) {
+      console.log("Something wrong happened");
+      return
+    }
   })
   next()
 })

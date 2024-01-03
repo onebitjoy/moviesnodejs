@@ -16,6 +16,8 @@ async function creator() {
 
     // } finally {
     // process.exit()
+  } finally {
+    process.exit(1)
   }
 
 }

@@ -5,7 +5,9 @@ import mongoose from "mongoose";
 
 mongoose
   .connect(process.env.MONGOURL)
-  .then(() => { console.log("Connected to MongoDB") })
+  .then(() => {
+    console.log(`Connected to MongoDB at ${Date().toLocaleUpperCase()}`)
+  })
   .catch(
     (error) => {
       console.error(error)
