@@ -2,7 +2,7 @@ import express from "express"
 import helmet from "helmet"
 import compression from "compression"
 import { errorMsg } from "./messages/errorMsg.js"
-import { CustomError } from "./utils/CustomError.js"
+import CustomError from "./utils/CustomError.js"
 import globalErrorHandler from "./controller/errorController.js"
 
 // import dotenv from 'dotenv'
@@ -40,6 +40,17 @@ app.all('*', (req, res, next) => {
 // don't add () at the end, produces undefined error
 app.use(globalErrorHandler)
 
-app.listen(PORT, () => {
-  console.log("App listening on port -", PORT)
+const server = app.listen(PORT, () => {
+  console.log(`App(${process.env.NODE_ENV}) on port -`, PORT)
+})
+
+
+process.on('unhandledRejection', (err) => {
+  console.log("Unhandled Rejection --", err.name, ":", err.message)
+  server.close(
+    () => {
+      console.log("Exiting...");
+      process.exit(1)
+    }
+  )
 })

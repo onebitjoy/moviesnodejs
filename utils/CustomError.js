@@ -1,8 +1,9 @@
 // We are only catching Operational Errors, which are different from grammatical errors
-export class CustomError extends Error {
+class CustomError extends Error {
 
   constructor(message, statusCode) {
     super(message)
+    this.message = message
     this.statusCode = statusCode
     this.status = statusCode >= 400 && statusCode < 500 ? "fail" : "error"
 
@@ -18,4 +19,4 @@ export class CustomError extends Error {
 
 }
 
-// const err = new CustomError("error msg", 404)
+export default CustomError

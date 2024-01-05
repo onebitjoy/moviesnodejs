@@ -5,8 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "prod": "pm2 start index.js -i 4",
-    "dev": "nodemon --env-file=config.env index.js",
+    "dev": "NODE_ENV=development nodemon --env-file=config.env  index.js",
+    "prod": "NODE_ENV=production nodemon --env-file=config.env index.js",
     "sampler": "node --env-file=config.env ./test/creator.js"
   },
   "author": "vinay kumar kharwar",

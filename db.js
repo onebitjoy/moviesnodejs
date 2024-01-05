@@ -8,9 +8,11 @@ mongoose
   .then(() => {
     console.log(`Connected to MongoDB at ${Date().toLocaleUpperCase()}`)
   })
-  .catch(
-    (error) => {
-      console.error(error)
-      process.exit(1)
-    }
-  )
+//error is gracefully handled inside index.js
+
+// .catch(
+//   (error) => {
+//     console.error(error)
+//     process.exit(1)
+//   }
+// )
