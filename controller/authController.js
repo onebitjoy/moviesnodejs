@@ -27,12 +27,12 @@ export const authController = {
     const user = await User.findByCredentials(email, password, next)
     const token = await user.generateAuthToken()
 
-    user.password = undefined
+    // user.password = undefined
     res.status(200).json(
       {
         status: "successful",
         token,
-        user
+        // user
       }
     )
   })
