@@ -1,5 +1,6 @@
 import express from "express";
 import { movieController } from "../controller/movieController.js";
+import { auth } from "../middlewares/auth.js"
 
 const movieRouter = express.Router()
 
@@ -10,7 +11,7 @@ movieRouter.route('/movies-by-genre/:genre')
   .get(movieController.getMovieByGenre)
 
 movieRouter.route("/")
-  .get(movieController.getAllMovies)
+  .get(auth, movieController.getAllMovies)
   .post(movieController.createMovie)
 
 movieRouter.route("/stats")

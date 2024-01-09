@@ -56,11 +56,8 @@ app.all('*', (req, res, next) => {
   next(err)
 })
 
-// don't add () at the end, produces undefined error
 app.use(globalErrorHandler)
 
 const server = app.listen(PORT, () => {
   console.log(`App(${process.env.NODE_ENV}) on port -`, PORT)
 })
-
-// console.log(x) -- undefined exception

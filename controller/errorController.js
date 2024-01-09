@@ -48,6 +48,17 @@ function validationErrorHandler(error) {
   return new CustomError(msg, error.statusCode)
 }
 
+
+function JWTTokenExpireErrorHandler(error) {
+  const msg = `Token Expired. Login Again`
+  return new CustomError(msg, 401)
+}
+
+function JWTInvalidErrorHandler(params) {
+  const msg = `Invalid Token Signature`
+  return new CustomError(msg, 401)
+}
+
 // the reason why express understands this is global error handler is its function signature
 export default (error, req, res, next) => {
   error.statusCode = error.statusCode || 500
@@ -58,7 +69,8 @@ export default (error, req, res, next) => {
   } else if (process.env.NODE_ENV === 'production') {
     if (error.name === "CastError") { error = castErrorHandler(error) }
     if (error.name === "ValidationError") { error = validationErrorHandler(error) }
-
+    if (error.name === "TokenExpiredError") { error = JWTTokenExpireErrorHandler(error) }
+    if (error.name === "JsonWebTokenError") { error = JWTInvalidErrorHandler(error) }
     productionError(res, error)
   }
 }

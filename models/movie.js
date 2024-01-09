@@ -12,39 +12,6 @@ const MovieSchema = new mongoose.Schema(
     genre: [
       {
         type: String,
-        // enum: [
-        //   'Literary genres',
-        //   'Action',
-        //   'Adventure',
-        //   'Comedy',
-        //   'Crime and mystery',
-        //   'Death game',
-        //   'Fantasy',
-        //   'Historical',
-        //   'Historical fiction',
-        //   'Horror',
-        //   'Romance',
-        //   'Satire',
-        //   'Science fiction',
-        //   'Cyberpunk and derivatives',
-        //   'Speculative',
-        //   'Thriller',
-        //   'Isekai',
-        //   'Other',
-        //   'Film and television genres',
-        //   'Scripted',
-        //   'Action and adventure',
-        //   'Animation',
-        //   'Comedy',
-        //   'Devotional',
-        //   'Drama',
-        //   'Hindu mythology',
-        //   'Historical',
-        //   'Horror',
-        //   'Science fiction',
-        //   'Western',
-        //   'Unscripted'
-        // ]
       }
     ],
     releaseDate: {
@@ -128,6 +95,7 @@ const MovieSchema = new mongoose.Schema(
     id: false
   }
 )
+
 /* VIRTUAL */
 MovieSchema.virtual("durationInHours").get(function () {
   // anon function because arrow function doesn't support 'this'
@@ -168,7 +136,11 @@ MovieSchema.pre('aggregate', function (next) {
 MovieSchema.post(/^find/, async function (docs, next) {
   this.endTime = Date.now()
   const content = `Query ${this.queryId} ${this.startTime}ms ${this.endTime}ms\n`
-  fs.writeFileSync('./Logs/logs.txt', content, { flag: 'a' }, err => { console.log("Logging Error - Post hook", err) })
+  fs.writeFileSync(
+    './Logs/logs.txt',
+    content, { flag: 'a' },
+    err => { console.log("Logging Error - Post hook", err) }
+  )
   next()
 })
 
@@ -196,8 +168,6 @@ MovieSchema.post('save', async function (doc, next) {
   })
   next()
 })
-
-
 
 MovieSchema.methods.toJSON = function () {
   const movie = this

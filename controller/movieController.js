@@ -1,12 +1,12 @@
 import Movie from "../models/movie.js"
 
-import { getHighestRated } from './middlewares/getHighestRated.js'
 import { ApiFeatures } from "../utils/apiFeatures.js"
 
 import { errorMsg } from "../messages/errorMsg.js"
 import { successMsg } from "../messages/successMsg.js"
 import CustomError from "../utils/CustomError.js"
 import asyncErrorHandler from "../utils/asyncErrorHandler.js"
+import { getHighestRated } from "../middlewares/getHighestRated.js"
 
 export const movieController = {
   //middlewares

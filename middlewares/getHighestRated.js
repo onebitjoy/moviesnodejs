@@ -1,4 +1,4 @@
-import asyncErrorHandler from "../../utils/asyncErrorHandler.js"
+import asyncErrorHandler from "../utils/asyncErrorHandler.js"
 
 export const getHighestRated = asyncErrorHandler(
   function (req, res, next) {
