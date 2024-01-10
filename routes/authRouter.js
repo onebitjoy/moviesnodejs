@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authController } from "../controller/authController.js";
+import { auth } from "../middlewares/auth.js";
 
 const authRouter = Router()
 
@@ -8,5 +9,11 @@ authRouter.route("/signup")
 
 authRouter.route("/login")
   .get(authController.login)
+
+authRouter.route("/logout")
+  .delete(auth, authController.logout)
+
+authRouter.route("/logout-all")
+  .delete(auth, authController.logoutAll)
 
 export default authRouter

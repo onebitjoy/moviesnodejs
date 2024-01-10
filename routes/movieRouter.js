@@ -11,7 +11,7 @@ movieRouter.route('/movies-by-genre/:genre')
   .get(movieController.getMovieByGenre)
 
 movieRouter.route("/")
-  .get(auth, movieController.getAllMovies)
+  .get(movieController.getAllMovies)
   .post(movieController.createMovie)
 
 movieRouter.route("/stats")

@@ -29,11 +29,10 @@ export const movieController = {
 
   deleteMovie: asyncErrorHandler(async (req, res, next) => {
     const movie = await Movie.findByIdAndDelete(req.params.movieId)
-    if (movie?.title) {
-      res.status(200).json(successMsg("The movie has been successfully deleted!"))
-    } else {
-      res.status(500).json(errorMsg("Can't delete Movie"))
+    if (!movie?.title) {
+      return next(new CustomError("Movie not found.", 404))
     }
+    res.status(200).json(successMsg(movie))
   }
   ),
 

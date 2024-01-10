@@ -45,8 +45,9 @@ import movieRouter from "./routes/movieRouter.js"
 import directorRouter from "./routes/directorRouter.js"
 import actorRouter from "./routes/actorRouter.js"
 import authRouter from "./routes/authRouter.js"
+import { auth } from "./middlewares/auth.js"
 
-app.use("/api/v1/movies", movieRouter)
+app.use("/api/v1/movies", auth, movieRouter)
 app.use("/api/v1/directors", directorRouter)
 app.use("/api/v1/actors", actorRouter)
 app.use("/api/v1/users", authRouter)

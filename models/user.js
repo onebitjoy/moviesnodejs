@@ -40,12 +40,23 @@ const UserSchema = Schema({
   tokens: [{
     token: { type: String, required: true }
   }],
-  photo: String
+  photo: String,
+  passwordChangedAt: {
+    type: Date
+  }
 },
   {
     timestamps: true
   }
 )
+
+UserSchema.methods.isPasswordChanged = async function (JWTIssueTime) {
+  if (this?.passwordChangedAt) {
+    const passwordChangeTime = parseInt(this.passwordChangedAt.getTime() / 1000, 10)
+    return passwordChangeTime > JWTIssueTime
+  }
+  return false
+}
 
 UserSchema.methods.generateAuthToken = async function () {
   const user = this
