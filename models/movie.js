@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"
 import fs from 'fs'
-import { nanoid } from "nanoid";
+import { nanoid } from "nanoid"
 
 const MovieSchema = new mongoose.Schema(
   {
