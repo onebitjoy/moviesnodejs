@@ -1,6 +1,7 @@
 import express from "express";
 import { movieController } from "../controller/movieController.js";
 import { auth } from "../middlewares/auth.js"
+import { authController } from "../controller/authController.js";
 
 const movieRouter = express.Router()
 
@@ -20,7 +21,6 @@ movieRouter.route("/stats")
 movieRouter.route("/:movieId")
   .get(movieController.getMovie)
   .post(movieController.updateMovie)
-  .delete(movieController.deleteMovie)
-
+  .delete(authController.accessChecker("admin", "manager"), movieController.deleteMovie)
 
 export default movieRouter

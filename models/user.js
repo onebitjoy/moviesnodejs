@@ -25,18 +25,11 @@ const UserSchema = Schema({
     maxLength: 80,
     select: false
   },
-
-  // passwordConfirm: {
-  //   type: String,
-  //   required: [true, "Please confirm your password"],
-  //   validate: {
-  //     // this validator will only work for save & create only, not update
-  //     validator: function (value) {
-  //       return value === this.password
-  //     },
-  //     message: "Password do not match"
-  //   }
-  // },
+  role: {
+    type: String,
+    enum: ["user", "admin", "manager"],
+    default: "user"
+  },
   tokens: [{
     token: { type: String, required: true }
   }],
@@ -44,11 +37,33 @@ const UserSchema = Schema({
   passwordChangedAt: {
     type: Date
   }
+  /*
+    passwordConfirm: {
+      type: String,
+      required: [true, "Please confirm your password"],
+      validate: {
+        // this validator will only work for save & create only, not update
+        validator: function (value) {
+          return value === this.password
+        },
+        message: "Password do not match"
+      }
+    },
+    */
 },
   {
     timestamps: true
   }
 )
+
+UserSchema.pre('save', async function (next) {
+  const user = this
+  if (user.isModified('password')) {
+    user.password = await hash(user.password, 12)
+    user.passwordConfirm = undefined
+  }
+  next()
+})
 
 UserSchema.methods.isPasswordChanged = async function (JWTIssueTime) {
   if (this?.passwordChangedAt) {
@@ -68,14 +83,18 @@ UserSchema.methods.generateAuthToken = async function () {
   return token
 }
 
-UserSchema.pre('save', async function (next) {
+UserSchema.methods.toJSON = function () {
   const user = this
-  if (user.isModified('password')) {
-    user.password = await hash(user.password, 12)
-    user.passwordConfirm = undefined
-  }
-  next()
-})
+  const userObj = user.toObject()
+
+  delete userObj.__v
+  delete userObj.updatedAt
+  delete userObj.createdAt
+  delete userObj.tokens
+  delete userObj.photo
+
+  return userObj
+}
 
 UserSchema.statics.findByCredentials = async (email, password, next) => {
 
@@ -99,19 +118,6 @@ UserSchema.statics.findByCredentials = async (email, password, next) => {
   }
 
   return user
-}
-
-UserSchema.methods.toJSON = function () {
-  const user = this
-  const userObj = user.toObject()
-
-  delete userObj.__v
-  delete userObj.updatedAt
-  delete userObj.createdAt
-  delete userObj.tokens
-  delete userObj.photo
-
-  return userObj
 }
 
 const User = model('User', UserSchema)

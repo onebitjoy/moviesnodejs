@@ -30,7 +30,6 @@ export const authController = {
     const user = await User.findByCredentials(email, password, next)
     const token = await user.generateAuthToken()
 
-    // user.password = undefined
     res.status(200).json(
       {
         status: "successful",
@@ -93,6 +92,37 @@ export const authController = {
         message: "You have been successfully logged out from all your devices!"
       })
     }
-  )
+  ),
+
+  // a closure fn to return function with specified roles
+  /*
+   The function is called with the role(enum: user | admin) parameter which returns a function
+   which  will return an error if the role doesnt match the specified role in the calling.
+   So the function is called as => authController.accessChecker("admin"), returns 
+    (req, res, next) => {
+      if (req.user.role !== "admin") {
+        return next(new CustomError(`User is not authorized to access the path`, 403))
+      }
+      next()
+    }
+    This function will be executed by express as a middleware
+  */
+  accessChecker: (...roles) => {
+    return (req, res, next) => {
+      if (!roles.includes(req.user.role)) {
+        return next(new CustomError(`Unauthorized Access`, 403))
+      }
+      next()
+    }
+  },
+  // accessChecker: (role) => {
+  //   return (req, res, next) => {
+  //     console.log(role, req.user.role)
+  //     if (req.user.role !== role) {
+  //       return next(new CustomError(`Unauthorized Access`, 403))
+  //     }
+  //     next()
+  //   }
+  // }
 }
 
