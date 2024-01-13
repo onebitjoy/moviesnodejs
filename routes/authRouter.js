@@ -16,4 +16,11 @@ authRouter.route("/logout")
 authRouter.route("/logout-all")
   .delete(auth, authController.logoutAll)
 
+
+authRouter.route("/forgot-password")
+  .post(authController.forgotPassword)
+
+authRouter.route("/reset-password")
+  .post(authController.resetPassword)
+
 export default authRouter

@@ -94,6 +94,25 @@ export const authController = {
     }
   ),
 
+  forgotPassword: asyncErrorHandler(async (req, res, next) => {
+    const user = await User.findOne({ email: req.body.email })
+    if (!user) {
+      return next(new Error("No such user with credentials found!", 404))
+    }
+
+    const resetToken = user.createPasswordResetToken()
+    console.log(`resetToken: ${resetToken}`)
+
+    await user.save({ validateBeforeSave: false })
+
+    res.status(200).json(user)
+    // send token to user's email
+  }),
+
+  resetPassword: asyncErrorHandler(async (req, res, next) => {
+
+  }),
+
   // a closure fn to return function with specified roles
   /*
    The function is called with the role(enum: user | admin) parameter which returns a function

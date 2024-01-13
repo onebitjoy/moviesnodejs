@@ -4,6 +4,8 @@ import { Schema, model } from "mongoose";
 import isEmail from "validator/lib/isEmail.js";
 import jwt from "jsonwebtoken"
 import CustomError from "../utils/CustomError.js";
+import { nanoid } from "nanoid";
+import crypto from "crypto"
 
 const UserSchema = Schema({
   name: {
@@ -36,7 +38,9 @@ const UserSchema = Schema({
   photo: String,
   passwordChangedAt: {
     type: Date
-  }
+  },
+  passwordResetToken: String,
+  passwordResetExpires: Date
   /*
     passwordConfirm: {
       type: String,
@@ -91,9 +95,16 @@ UserSchema.methods.toJSON = function () {
   delete userObj.updatedAt
   delete userObj.createdAt
   delete userObj.tokens
-  delete userObj.photo
 
   return userObj
+}
+
+UserSchema.methods.createPasswordResetToken = function () {
+  const resetToken = nanoid()
+  this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex')
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000 // 10 mins from now
+
+  return resetToken
 }
 
 UserSchema.statics.findByCredentials = async (email, password, next) => {
