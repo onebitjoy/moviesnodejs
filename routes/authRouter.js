@@ -21,6 +21,9 @@ authRouter.route("/forgot-password")
   .post(authController.forgotPassword)
 
 authRouter.route("/reset-password/:token")
-  .get(authController.resetPassword)
+  .patch(authController.resetPassword)
+
+authRouter.route("/update/password")
+  .post(auth, authController.updatePassword)
 
 export default authRouter

@@ -39,20 +39,19 @@ const UserSchema = Schema({
     type: Date
   },
   passwordResetToken: String,
-  passwordResetExpires: Date
-  /*
-    passwordConfirm: {
-      type: String,
-      required: [true, "Please confirm your password"],
-      validate: {
-        // this validator will only work for save & create only, not update
-        validator: function (value) {
-          return value === this.password
-        },
-        message: "Password do not match"
-      }
-    },
-    */
+  passwordResetExpires: Date,
+  // passwordConfirm: {
+  //   type: String,
+  //   required: [true, "Please confirm your password"],
+  //   validate: {
+  //     // this validator will only work for save & create only, not update
+  //     validator: function (value) {
+  //       return value === this.password
+  //     },
+  //     message: "Password do not match"
+  //   }
+  // },
+
 },
   {
     timestamps: true
@@ -63,8 +62,13 @@ UserSchema.pre('save', async function (next) {
   const user = this
   if (user.isModified('password')) {
     user.password = await hash(user.password, 12)
-    user.passwordConfirm = undefined
   }
+  next()
+})
+
+UserSchema.pre("save", async function (next) {
+  if (!this.isModified('password') || this.isNew) return next()
+  this.passwordChangedAt = Date.now() - 1000
   next()
 })
 
@@ -89,11 +93,11 @@ UserSchema.methods.generateAuthToken = async function () {
 UserSchema.methods.toJSON = function () {
   const user = this
   const userObj = user.toObject()
-
   delete userObj.__v
   delete userObj.updatedAt
   delete userObj.createdAt
   delete userObj.tokens
+  delete userObj?.passwordConfirm
 
   return userObj
 }

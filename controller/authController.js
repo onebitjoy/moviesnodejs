@@ -1,22 +1,26 @@
 import User from "../models/user.js"
 import asyncErrorHandler from "../utils/asyncErrorHandler.js"
 import CustomError from "../utils/CustomError.js"
-import util from "util"
-import jwt from "jsonwebtoken"
 import { sendEmail } from "../utils/email.js"
 import crypto from "crypto"
+import pkg from "bcryptjs"
+const { compare } = pkg
+
 export const authController = {
   signup: asyncErrorHandler(
     async (req, res, next) => {
-      const new_user = await User.create(req.body)
-      const token = await new_user.generateAuthToken()
-      res.status(201).json({
-        status: "success",
-        token,
-        data: new_user
-      })
+      const user = await User.create(req.body)
 
+      const token = await user.generateAuthToken()
+      res.status(200).json(
+        {
+          status: "successful",
+          token,
+          user
+        }
+      )
     }
+
   ),
 
   login: asyncErrorHandler(async function (req, res, next) {
@@ -29,13 +33,19 @@ export const authController = {
     }
 
     const user = await User.findByCredentials(email, password, next)
+
     const token = await user.generateAuthToken()
+
+    const updatedUser = user
+
+    delete updatedUser.password
+    delete updatedUser.passwordChangedAt
 
     res.status(200).json(
       {
         status: "successful",
         token,
-        // user
+        updatedUser
       }
     )
   }),
@@ -102,15 +112,15 @@ export const authController = {
     }
 
     const resetToken = user.createPasswordResetToken()
-    console.log(`resetToken: ${resetToken}`)
 
     await user.save({ validateBeforeSave: false })
     const resetLink = `${req.protocol}://${req.get('host')}/api/v1/users/reset-password/${resetToken}`
 
     try {
-      sendEmail({
+      await sendEmail({
         sender: "Resetter@funmail.com",
         email: user.email,
+        subject: "Password Reset",
         username: user.name,
         resetLink: resetLink
       })
@@ -130,16 +140,79 @@ export const authController = {
   resetPassword: asyncErrorHandler(async (req, res, next) => {
     const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex')
 
-    const user = await User.findOne({ passwordResetToken: hashedToken, passwordResetExpires: { gt: Date.now() } })
+    const user = await User.findOne({ passwordResetToken: hashedToken, passwordResetExpires: { $gt: Date.now() } })
 
     if (!user) {
-      return next(new Error("No such user with credentials found!", 404))
+      return next(new CustomError("No such user with credentials found!", 404))
     }
 
-    res.json(user)
+    user.password = req.body.password
+
+    user.passwordResetToken = undefined
+    user.passwordResetExpires = undefined
+
+    await user.save()
+    const token = await user.generateAuthToken()
+
+    const updatedUser = user
+
+    delete updatedUser.password
+    delete updatedUser.passwordChangedAt
+
+    res.status(200).json(
+      {
+        status: "successful",
+        token,
+        updatedUser
+      }
+    )
+  }),
+
+  updatePassword: asyncErrorHandler(async (req, res, next) => {
+    // user.password -- hashed in DB
+    // req.body.currentUserPassword -- the password that was hashed
+    // req.body.newPassword -- new password to be set
+    const { currentUserPassword, newPassword } = req.body
+
+    const user = await User.findById(req.user.id).select("+password")
+
+    if (!currentUserPassword) {
+      next(new CustomError("No password given, can't update password!", 403))
+    }
+    const comparePassword = await compare(currentUserPassword, user.password)
+    if (!comparePassword) {
+      return next(new CustomError("Wrong password given!", 403))
+    }
+
+    user.password = newPassword
+    await user.save()
+
+    const token = await user.generateAuthToken()
+
+    const updatedUser = user
+
+    delete updatedUser.passwordChangedAt
+    delete updatedUser.password
+
+    res.status(200).json(
+      {
+        status: "successful",
+        token,
+        user
+      }
+    )
+
   }),
 
   // a closure fn to return function with specified roles
+  accessChecker: (...roles) => {
+    return (req, res, next) => {
+      if (!roles.includes(req.user.role)) {
+        return next(new CustomError(`Unauthorized Access`, 403))
+      }
+      next()
+    }
+  },
   /*
    The function is called with the role(enum: user | admin) parameter which returns a function
    which  will return an error if the role doesnt match the specified role in the calling.
@@ -152,21 +225,4 @@ export const authController = {
     }
     This function will be executed by express as a middleware
   */
-  accessChecker: (...roles) => {
-    return (req, res, next) => {
-      if (!roles.includes(req.user.role)) {
-        return next(new CustomError(`Unauthorized Access`, 403))
-      }
-      next()
-    }
-  },
-  // accessChecker: (role) => {
-  //   return (req, res, next) => {
-  //     console.log(role, req.user.role)
-  //     if (req.user.role !== role) {
-  //       return next(new CustomError(`Unauthorized Access`, 403))
-  //     }
-  //     next()
-  //   }
-  // }
 }
