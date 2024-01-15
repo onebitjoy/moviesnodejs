@@ -21,6 +21,7 @@ import "./models/user.js"
 // ----------------------------------------
 process.on('unhandledRejection', (err) => {
   console.log("Unhandled Rejection --", err.name, ":", err.message)
+  console.log(err);
   server.close(
     () => {
       console.log("Exiting...");
@@ -28,6 +29,7 @@ process.on('unhandledRejection', (err) => {
     }
   )
 })
+
 process.on('uncaughtException', (err) => {
   console.log("Uncaught Exception --", err.name, ":", err.message, "\nExiting...")
   process.exit(1)

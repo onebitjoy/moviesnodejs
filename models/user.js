@@ -4,7 +4,6 @@ import { Schema, model } from "mongoose";
 import isEmail from "validator/lib/isEmail.js";
 import jwt from "jsonwebtoken"
 import CustomError from "../utils/CustomError.js";
-import { nanoid } from "nanoid";
 import crypto from "crypto"
 
 const UserSchema = Schema({
@@ -100,7 +99,7 @@ UserSchema.methods.toJSON = function () {
 }
 
 UserSchema.methods.createPasswordResetToken = function () {
-  const resetToken = nanoid()
+  const resetToken = crypto.randomBytes(32).toString('hex')
   this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex')
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000 // 10 mins from now
 

@@ -3,7 +3,8 @@ import asyncErrorHandler from "../utils/asyncErrorHandler.js"
 import CustomError from "../utils/CustomError.js"
 import util from "util"
 import jwt from "jsonwebtoken"
-
+import { sendEmail } from "../utils/email.js"
+import crypto from "crypto"
 export const authController = {
   signup: asyncErrorHandler(
     async (req, res, next) => {
@@ -104,13 +105,38 @@ export const authController = {
     console.log(`resetToken: ${resetToken}`)
 
     await user.save({ validateBeforeSave: false })
+    const resetLink = `${req.protocol}://${req.get('host')}/api/v1/users/reset-password/${resetToken}`
 
-    res.status(200).json(user)
-    // send token to user's email
+    try {
+      sendEmail({
+        sender: "Resetter@funmail.com",
+        email: user.email,
+        username: user.name,
+        resetLink: resetLink
+      })
+
+      res.status(200).json({
+        status: "success",
+        message: "Reset mail sent!",
+      })
+    } catch (error) {
+      user.passwordResetExpires = undefined
+      user.passwordResetToken = undefined
+      await user.save()
+      return next(CustomError("Can't initiate password reset!", 500))
+    }
   }),
 
   resetPassword: asyncErrorHandler(async (req, res, next) => {
+    const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex')
 
+    const user = await User.findOne({ passwordResetToken: hashedToken, passwordResetExpires: { gt: Date.now() } })
+
+    if (!user) {
+      return next(new Error("No such user with credentials found!", 404))
+    }
+
+    res.json(user)
   }),
 
   // a closure fn to return function with specified roles
@@ -144,4 +170,3 @@ export const authController = {
   //   }
   // }
 }
-

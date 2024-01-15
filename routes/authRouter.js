@@ -20,7 +20,7 @@ authRouter.route("/logout-all")
 authRouter.route("/forgot-password")
   .post(authController.forgotPassword)
 
-authRouter.route("/reset-password")
-  .post(authController.resetPassword)
+authRouter.route("/reset-password/:token")
+  .get(authController.resetPassword)
 
 export default authRouter
