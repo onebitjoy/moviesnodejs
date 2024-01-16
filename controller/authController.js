@@ -6,25 +6,29 @@ import crypto from "crypto"
 import pkg from "bcryptjs"
 const { compare } = pkg
 
+const createAndSendToken = async (user, statusCode, res) => {
+  try {
+    const token = await user.generateAuthToken()
+    res.status(statusCode).json({
+      status: "success",
+      token,
+      data: { user }
+    })
+  } catch (error) {
+    res.status(500).json({ status: "failure", message: "Can't create token!" })
+  }
+}
+
 export const authController = {
+
   signup: asyncErrorHandler(
     async (req, res, next) => {
       const user = await User.create(req.body)
 
-      const token = await user.generateAuthToken()
-      res.status(200).json(
-        {
-          status: "successful",
-          token,
-          user
-        }
-      )
-    }
-
-  ),
+      createAndSendToken(user, 201, res)
+    }),
 
   login: asyncErrorHandler(async function (req, res, next) {
-
     const { email, password } = req.body
 
     if (!email || !password) {
@@ -34,20 +38,11 @@ export const authController = {
 
     const user = await User.findByCredentials(email, password, next)
 
-    const token = await user.generateAuthToken()
-
     const updatedUser = user
-
     delete updatedUser.password
     delete updatedUser.passwordChangedAt
 
-    res.status(200).json(
-      {
-        status: "successful",
-        token,
-        updatedUser
-      }
-    )
+    createAndSendToken(updatedUser, 200, res)
   }),
 
   logout: asyncErrorHandler(
@@ -127,11 +122,12 @@ export const authController = {
 
       res.status(200).json({
         status: "success",
-        message: "Reset mail sent!",
+        message: "Password reset link sent to your Email!",
       })
+
     } catch (error) {
-      user.passwordResetExpires = undefined
       user.passwordResetToken = undefined
+      user.passwordResetExpires = undefined
       await user.save()
       return next(CustomError("Can't initiate password reset!", 500))
     }
@@ -141,31 +137,20 @@ export const authController = {
     const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex')
 
     const user = await User.findOne({ passwordResetToken: hashedToken, passwordResetExpires: { $gt: Date.now() } })
-
     if (!user) {
-      return next(new CustomError("No such user with credentials found!", 404))
+      return next(new CustomError("No such user found or link expired!", 404))
     }
 
     user.password = req.body.password
-
     user.passwordResetToken = undefined
     user.passwordResetExpires = undefined
 
     await user.save()
-    const token = await user.generateAuthToken()
-
     const updatedUser = user
-
     delete updatedUser.password
     delete updatedUser.passwordChangedAt
 
-    res.status(200).json(
-      {
-        status: "successful",
-        token,
-        updatedUser
-      }
-    )
+    createAndSendToken(updatedUser, 200, res)
   }),
 
   updatePassword: asyncErrorHandler(async (req, res, next) => {
@@ -186,43 +171,33 @@ export const authController = {
 
     user.password = newPassword
     await user.save()
-
-    const token = await user.generateAuthToken()
-
     const updatedUser = user
-
     delete updatedUser.passwordChangedAt
     delete updatedUser.password
 
-    res.status(200).json(
-      {
-        status: "successful",
-        token,
-        user
-      }
-    )
+    createAndSendToken(updatedUser, 200, res)
 
   }),
 
   // a closure fn to return function with specified roles
   accessChecker: (...roles) => {
+    /*
+  The function is called with the role(enum: user | admin) parameter which returns a function
+  which  will return an error if the role doesnt match the specified role in the calling.
+  So the function is called as => authController.accessChecker("admin"), returns 
+   (req, res, next) => {
+     if (req.user.role !== "admin") {
+       return next(new CustomError(`User is not authorized to access the path`, 403))
+     }
+     next()
+   }
+   This function will be executed by express as a middleware
+ */
     return (req, res, next) => {
       if (!roles.includes(req.user.role)) {
         return next(new CustomError(`Unauthorized Access`, 403))
       }
       next()
     }
-  },
-  /*
-   The function is called with the role(enum: user | admin) parameter which returns a function
-   which  will return an error if the role doesnt match the specified role in the calling.
-   So the function is called as => authController.accessChecker("admin"), returns 
-    (req, res, next) => {
-      if (req.user.role !== "admin") {
-        return next(new CustomError(`User is not authorized to access the path`, 403))
-      }
-      next()
-    }
-    This function will be executed by express as a middleware
-  */
+  }
 }

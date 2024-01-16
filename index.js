@@ -46,13 +46,13 @@ app.use(compression())
 import movieRouter from "./routes/movieRouter.js"
 import directorRouter from "./routes/directorRouter.js"
 import actorRouter from "./routes/actorRouter.js"
-import authRouter from "./routes/authRouter.js"
+import userRouter from "./routes/userRouter.js"
 import { auth } from "./middlewares/auth.js"
 
 app.use("/api/v1/movies", auth, movieRouter)
 app.use("/api/v1/directors", directorRouter)
 app.use("/api/v1/actors", actorRouter)
-app.use("/api/v1/users", authRouter)
+app.use("/api/v1/users", userRouter)
 
 app.all('*', (req, res, next) => {
   const err = new CustomError(`Can't find page - ${req.originalUrl} on the server`, 404)

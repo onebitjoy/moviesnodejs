@@ -40,6 +40,11 @@ const UserSchema = Schema({
   },
   passwordResetToken: String,
   passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false
+  }
   // passwordConfirm: {
   //   type: String,
   //   required: [true, "Please confirm your password"],
@@ -93,11 +98,14 @@ UserSchema.methods.generateAuthToken = async function () {
 UserSchema.methods.toJSON = function () {
   const user = this
   const userObj = user.toObject()
+
   delete userObj.__v
   delete userObj.updatedAt
   delete userObj.createdAt
   delete userObj.tokens
   delete userObj?.passwordConfirm
+  delete userObj?.password
+  delete userObj?.active
 
   return userObj
 }
