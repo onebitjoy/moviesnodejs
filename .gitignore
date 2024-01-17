@@ -2,3 +2,4 @@ node_modules/
 config.env
 Logs/
 .gitignore
+/Logs/logs.txt

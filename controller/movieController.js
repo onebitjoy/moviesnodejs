@@ -53,7 +53,6 @@ export const movieController = {
 
   // doesnt require a movieId, but may recieve query parameters
   getAllMovies: asyncErrorHandler(async (req, res, next) => {
-
     let query = Movie.find()
     let apiFeatures = new ApiFeatures(query, req.query)
     apiFeatures.filter().sort().paginate()

@@ -13,14 +13,14 @@ movieRouter.route('/movies-by-genre/:genre')
 
 movieRouter.route("/")
   .get(movieController.getAllMovies)
-  .post(movieController.createMovie)
+  .post(auth, movieController.createMovie)
 
 movieRouter.route("/stats")
   .get(movieController.getMovieStats)
 
 movieRouter.route("/:movieId")
   .get(movieController.getMovie)
-  .post(movieController.updateMovie)
-  .delete(authController.accessChecker("admin", "manager"), movieController.deleteMovie)
+  .post(auth, movieController.updateMovie)
+  .delete(auth, authController.accessChecker("admin", "manager"), movieController.deleteMovie)
 
 export default movieRouter
