@@ -36,26 +36,27 @@ const app = express()
 
 // ----------------------------------------- Global Middlewares
 import { rateLimit } from 'express-rate-limit'
-const rateLimiter = rateLimit({
-  windowMs: process.env.RATE_LIMIT_WINDOW,
-  limit: process.env.RATE_LIMIT_MAX_NUMBER,
-  message: "Too many requests!",
-  standardHeaders: 'draft-7', // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
-})
+if (process.env.NODE_ENV === "production") {
+  const rateLimiter = rateLimit({
+    windowMs: process.env.RATE_LIMIT_WINDOW,
+    limit: process.env.RATE_LIMIT_MAX_NUMBER,
+    message: "Too many requests!",
+    standardHeaders: 'draft-7', // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+  })
 
+  app.use("/api", rateLimiter)
+}
 
-app.use("/api", rateLimiter)
 app.use(express.json()) // if there is validation error, check this
 app.use(helmet()) // prevents Cross-Site Scripting
 app.use(compression())
 
-// Routers
+// ---------------------------------------- Routers
 import movieRouter from "./routes/movieRouter.js"
 import directorRouter from "./routes/directorRouter.js"
 import actorRouter from "./routes/actorRouter.js"
 import userRouter from "./routes/userRouter.js"
-import { auth } from "./middlewares/auth.js"
 
 app.use("/api/v1/movies", movieRouter)
 app.use("/api/v1/directors", directorRouter)
@@ -70,6 +71,5 @@ app.all('*', (req, res, next) => {
 app.use(globalErrorHandler)
 
 const server = app.listen(PORT, () => {
-  console.log(`Process ID: ${process.pid}`)
-  console.log(`App(${process.env.NODE_ENV}) on port -`, PORT)
+  console.log(`App(${process.env.NODE_ENV}) processID:${process.pid}  port: ${PORT}`)
 })
