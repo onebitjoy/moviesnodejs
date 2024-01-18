@@ -71,9 +71,11 @@ export const movieController = {
   getMovieStats: asyncErrorHandler(async (req, res, next) => {
     // aggregate function takes an array of stages,
     // the data goes from one stage to another while being manipulated by the current stage
+    const rating = req.params?.rating || 5
+
     const stats = await Movie.aggregate([
       // { $match: { releaseDate: { $lte: new Date() } } }, -- works, but done in aggregation pipeline
-      { $match: { rating: { $gte: 7 } } },
+      { $match: { rating: { $gte: rating } } },
       {
         $group: {
           // The _id is the key according to which the documents will be grouped
@@ -97,7 +99,7 @@ export const movieController = {
 
   getMovieByGenre: asyncErrorHandler(async (req, res, next) => {
     const genre = req.params.genre
-    // sometimes, we are using $ with fieldnames, that is when we refer to fields in mongoDB
+    // sometimes, we are using '$' with fieldnames, that is when we refer to fields in mongoDB
     // the fields without $ are fetched
     const movies = await Movie.aggregate([
       { $unwind: '$genre' },

@@ -14,15 +14,23 @@ import { customAlphabet } from "nanoid"
 export const auth = asyncErrorHandler(
   async (req, res, next) => {
 
-    // get auth token from request headers
-    const token = req.headers.authorization
-    if (!token || !token.startsWith('Bearer')) {
-      return next(new CustomError("Please login first!", 401))
+    // // get auth token from request headers
+    // const token = req.headers.authorization
+    // if (!token || !token.startsWith('Bearer')) {
+    //   return next(new CustomError("Please login first!", 401))
+    // }
+    // let authToken = token.split(" ")[1]
+
+    let token;
+
+    if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
+      token = req.headers.authorization.split(' ')[1];
+    } else {
+      token = req.cookies["jwt"];
     }
-    let authToken = token.split(" ")[1]
 
     // find user using decoded token
-    const decodedToken = await util.promisify(jwt.verify)(authToken, process.env.SECRET_KEY)
+    const decodedToken = await util.promisify(jwt.verify)(token, process.env.SECRET_KEY)
     const user = await User.findById(decodedToken.id)
     if (!user) {
       return next(new CustomError("Can't find any user with the credentials", 401))
@@ -31,7 +39,7 @@ export const auth = asyncErrorHandler(
     // check if the user even has auth token from step 1
     let userTokens = []
     user.tokens.forEach(tkn => userTokens.push(tkn.token))
-    if (!userTokens.includes(authToken)) {
+    if (!userTokens.includes(token)) {
       return next(new CustomError("Please login first. No auth.", 401))
     }
 
