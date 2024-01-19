@@ -34,6 +34,7 @@ process.on('uncaughtException', (err) => {
 // ----------------------------------------
 
 const app = express()
+app.set('trust proxy', 1);
 
 // ----------------------------------------- Global Middlewares
 import ExpressMongoSanitize from "express-mongo-sanitize"
